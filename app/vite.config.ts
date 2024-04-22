@@ -1,8 +1,10 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  base: "https://emperor.si/",
-});
+export default ({ mode }: { mode: any }) => {
+  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+  return defineConfig({
+    plugins: [react()],
+    base: process.env.VITE_PUBLIC_URL,
+  });
+};
