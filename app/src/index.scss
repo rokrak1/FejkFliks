@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+
+
+
+:root {
+  --color-secondary: #17a48a;
+  font-family: "Poppins", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  font-family: "Poppins" !important;
+  scrollbar-width: none;
+}
+
+.flex-item {
+  flex: 1 1 auto; 
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 6px; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.element-with-hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
+input[type=range] {
+  -webkit-appearance: none;
+  -moz-apperance: none;
+  border-radius: 6px;
+  height: 6px;
+  
+  background-image: -webkit-gradient(linear,
+      left top, 
+      right top, 
+      color-stop(15%, #df7164),
+      color-stop(15%, #F5D0CC));
+  
+  background-image: -moz-linear-gradient(left center,
+      #DF7164 0%, #DF7164 15%,
+      #F5D0CC 15%, #F5D0CC 100%);
+}
+
+input[type="range"]::-moz-range-track {
+  border: none;
+  background: none;
+  outline: none;
+}
+
+input[type=range]:focus {
+  outline: none;
+  border: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  background-color: #df7164;
+  height: 13px;
+  width: 13px;
+  border-radius: 50%;
+}
+
+input[type=range]::-moz-range-thumb {
+  -moz-appearance: none !important;
+  background-color: #df7164;
+  border: none;
+  height: 13px;
+  width: 13px;
+  border-radius: 50%;
+}
+
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+
+}
+
+body {
+  background: rgb(2,0,36);
+  background: linear-gradient(167deg, rgba(2,0,36,1) 0%, rgba(36,37,43,1) 0%, rgba(6,10,15,1) 100%); 
+}
+
+.glass {
+/* From https://css.glass */
+background: rgba(255, 255, 255, 0.16);
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(5.8px);
+-webkit-backdrop-filter: blur(5.8px);
+//border: 1px solid rgba(255, 255, 255, 0.09);
+}
