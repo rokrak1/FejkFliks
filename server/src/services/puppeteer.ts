@@ -1,5 +1,6 @@
 import puppeteer, { Page } from "puppeteer";
 import { fetchData, parseTitle, Category } from "../utils/puppeteer.utils";
+import { uploadSubtitleToBunnyNet } from "./bunny";
 
 var headers = {};
 
@@ -126,8 +127,16 @@ const twShowHandler = async (
   if (responseData.error) {
     throw new Error(responseData.error.message);
   }
-  //TODO: Upload file to bunny.net
-  return Buffer.from(responseData.text!, "utf-8");
+
+  // Upload to bunny.net
+  const buffer = Buffer.from(responseData.text!, "utf-8");
+  try {
+    await uploadSubtitleToBunnyNet(fileName, buffer);
+  } catch (error) {
+    console.error("ERRORSON", error);
+  }
+
+  return buffer;
 };
 
 const movieHandler = (page: Page) => {};
@@ -144,7 +153,6 @@ export const scrapeSubtitle = async (fileName: string) => {
   }
 
   const { name, season, episode, type } = titleData;
-  console.log(titleData);
   const browser = await puppeteer.launch({
     headless: true,
   });

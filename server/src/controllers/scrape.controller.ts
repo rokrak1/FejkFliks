@@ -1,18 +1,14 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { controller, get, schema } from "../decorators";
 import { scrapeSubtitle } from "../services/puppeteer";
+import { fetchSubtitleFromBunnyNet } from "../services/bunny";
 
 interface GetSubitlesQuerystring {
   fileName: string;
 }
 
-@controller("/api")
-class MainController {
-  @get("/ping")
-  ping(req: FastifyRequest, reply: FastifyReply) {
-    reply.send("pong");
-  }
-
+@controller("/scrape")
+class ScrapeController {
   @get<{ Querystring: GetSubitlesQuerystring }>("/getSubtitles")
   @schema({
     querystring: {
@@ -24,9 +20,21 @@ class MainController {
     reply: FastifyReply
   ) {
     try {
+      console.log("I RUN");
       const fileName = req.query.fileName;
-      // TODO: Check bunny.net if the file is subtitle already exists
-      const subtitleBuffer = await scrapeSubtitle(fileName);
+
+      let subtitleBuffer = null;
+
+      // Fetch subtitle from bunny.net
+      try {
+        subtitleBuffer = await fetchSubtitleFromBunnyNet(fileName);
+      } catch (error) {
+        // console.error(error);
+      }
+
+      if (!subtitleBuffer) {
+        subtitleBuffer = await scrapeSubtitle(fileName);
+      }
 
       reply.header(
         "Content-Disposition",
@@ -35,10 +43,10 @@ class MainController {
       reply.header("Content-Type", "text/plain");
 
       // Send the buffer
-      reply.send(subtitleBuffer);
+      return reply.send(subtitleBuffer);
     } catch (error) {
       console.error(error);
-      reply.send("error:" + error);
+      return reply.send("error:" + error);
     }
   }
 }

@@ -39,8 +39,7 @@ export function controller(routePrefix: string) {
       middlewares.unshift(jsonwebtokenAuth);
       if (path) {
         router[method](
-          `${routePrefix}${path}`,
-
+          `/api${routePrefix}${path}`,
           {
             schema: schema,
             preHandler: middlewares,
