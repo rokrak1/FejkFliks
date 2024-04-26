@@ -1,15 +1,20 @@
 import "reflect-metadata";
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest, FastifyReply, RouteGenericInterface } from "fastify";
 import { Methods } from "./enums/Methods";
 import { MetadataKeys } from "./enums/MetadataKeys";
 
-interface RouteHandlerDescriptor extends PropertyDescriptor {
-  value?: (req: FastifyRequest, reply: FastifyReply) => void | Promise<void>;
+interface RouteHandlerDescriptor<T extends RouteGenericInterface>
+  extends PropertyDescriptor {
+  value?: (req: FastifyRequest<T>, reply: FastifyReply) => void | Promise<void>;
 }
 
 function routerBinder(method: string) {
-  return function (path: string) {
-    return function (target: any, key: string, desc: RouteHandlerDescriptor) {
+  return function <T extends RouteGenericInterface>(path: string) {
+    return function (
+      target: any,
+      key: string,
+      desc: RouteHandlerDescriptor<T>
+    ) {
       Reflect.defineMetadata(MetadataKeys.PATH, path, target, key);
       Reflect.defineMetadata(MetadataKeys.METHOD, method, target, key);
       if (desc.value) {

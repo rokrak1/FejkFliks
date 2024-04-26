@@ -1,6 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { controller, get } from "../decorators";
+import { controller, get, schema } from "../decorators";
 import { scrapeSubtitle } from "../services/puppeteer";
+
+interface GetSubitlesQuerystring {
+  fileName: string;
+}
 
 @controller("/api")
 class MainController {
@@ -9,13 +13,29 @@ class MainController {
     reply.send("pong");
   }
 
-  @get("/scrape")
-  async scrape(req: FastifyRequest, reply: FastifyReply) {
+  @get<{ Querystring: GetSubitlesQuerystring }>("/getSubtitles")
+  @schema({
+    querystring: {
+      fileName: { type: "string" },
+    },
+  })
+  async scrape(
+    req: FastifyRequest<{ Querystring: GetSubitlesQuerystring }>,
+    reply: FastifyReply
+  ) {
     try {
-      const found = await scrapeSubtitle(
-        "The.Boys.S01E02.1080p.BluRay.x265-YAWNiX"
+      const fileName = req.query.fileName;
+      // TODO: Check bunny.net if the file is subtitle already exists
+      const subtitleBuffer = await scrapeSubtitle(fileName);
+
+      reply.header(
+        "Content-Disposition",
+        `attachment; filename="${fileName}.srt"`
       );
-      reply.send("scrape");
+      reply.header("Content-Type", "text/plain");
+
+      // Send the buffer
+      reply.send(subtitleBuffer);
     } catch (error) {
       console.error(error);
       reply.send("error:" + error);

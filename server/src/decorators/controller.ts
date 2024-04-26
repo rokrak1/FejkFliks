@@ -2,8 +2,6 @@ import "reflect-metadata";
 import { AppRouter } from "../router";
 import { MetadataKeys } from "./enums/MetadataKeys";
 import { Methods } from "./enums/Methods";
-import util from "util";
-import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
 import jsonwebtokenAuth from "../middlewares/jsonwebtokenAuth";
 
 export function controller(routePrefix: string) {
@@ -34,12 +32,19 @@ export function controller(routePrefix: string) {
         Reflect.getMetadata(MetadataKeys.MIDDLEWARE, target.prototype, key) ||
         [];
 
-      // Token validation on non Auth endpoints
-      middlewares.shift(jsonwebtokenAuth);
+      const schema =
+        Reflect.getMetadata(MetadataKeys.SCHEMA, target.prototype, key) || [];
+
+      // Supabase token validation
+      middlewares.unshift(jsonwebtokenAuth);
       if (path) {
         router[method](
           `${routePrefix}${path}`,
-          { preHandler: middlewares },
+
+          {
+            schema: schema,
+            preHandler: middlewares,
+          },
           routeHandler
         );
       }

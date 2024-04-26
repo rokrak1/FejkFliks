@@ -1,23 +1,27 @@
-import fs from "fs";
-import path from "path";
 import { ElementHandle, Page } from "puppeteer";
 
-export function saveBase64AsFile(base64Data: string, filename: string) {
-  const extension = ".srt";
-  const completeFilename = filename + extension;
-  const base64ContentArray = base64Data.split(";base64,");
-  const fileContent = base64ContentArray[1];
-  const fileBuffer = Buffer.from(fileContent, "base64");
-  fs.writeFileSync(
-    path.join(process.cwd(), "tmp", completeFilename),
-    fileBuffer
-  );
-  console.log(`File saved as ${completeFilename}`);
+export function arrayBufferToBuffer(arrayBuffer: ArrayBuffer) {
+  return Buffer.from(arrayBuffer);
 }
 
-interface ReponseData {
-  base64: string;
-  error: Error;
+export function convertSrtToVtt(text: string) {
+  let vttContent = "WEBVTT\n\n";
+
+  const srtLines = text.split("\n");
+  for (const line of srtLines) {
+    const vttTimestamp = line.replace(
+      /(\d{2}):(\d{2}):(\d{2}),(\d{3})/g,
+      "$1:$2:$3.$4"
+    );
+    vttContent += vttTimestamp + "\n";
+  }
+
+  return Buffer.from(vttContent, "utf-8");
+}
+
+interface ResponseData {
+  text: string | null;
+  error: Error | null;
 }
 
 export async function fetchData(
@@ -37,27 +41,18 @@ export async function fetchData(
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
-          return response.blob();
+          return response.text();
         })
-        .then((blob) => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () =>
-              resolve({
-                base64: reader.result,
-                error: null,
-              });
-            reader.onerror = () => reject(new Error("FileReader error"));
-            reader.readAsDataURL(blob);
-          });
+        .then((text) => {
+          return { text, error: null };
         })
         .catch((error) => {
-          return { base64: "", error };
+          return { text: null, error };
         });
     },
     linkHref,
     headers
-  )) as ReponseData;
+  )) as ResponseData;
 }
 
 interface TitleData {
@@ -65,8 +60,11 @@ interface TitleData {
   type: Category;
   season: number | null;
   episode: number | null;
+  resolution: string | null;
+  source?: string;
+  encoding?: string;
   year?: number;
-  otherSpecs: string[];
+  releaseGroup?: string;
 }
 
 export enum Category {
@@ -75,21 +73,21 @@ export enum Category {
 }
 
 export function parseTitle(title: string): TitleData | null {
-  // Regex for series - captures series name, season, and episode numbers
-  const seriesRegex = /^(.*?)\.S(\d+)E(\d+)\.(.*?)(\d{3,4}p)/;
-  const movieRegex = /^(.*?)\s(\d{4})\s(.*?)(\d{3,4}p)/;
+  const seriesRegex =
+    /^(.+?)\s+S(\d+)E(\d+)(?:\s+(.*?))?(?:\s+(\d{3,4}p))?\s*(WEBRip|HDTV|BluRay|BRRip)?\s*(x264|x265)?(?:-(\w+))?/i;
+  const movieRegex = /^(.*?)\s+(\d{4})\s(.*?)(\d{3,4}p)?$/;
 
   let match = title.match(seriesRegex);
   if (match) {
     return {
-      name: match[1].replace(/\./g, " "),
+      name: match[1].trim(),
       type: Category.TV_SHOW,
       season: parseInt(match[2], 10),
       episode: parseInt(match[3], 10),
-      otherSpecs: match[4]
-        .split(".")
-        .concat(match[5].split("."))
-        .filter(Boolean),
+      resolution: match[5],
+      source: match[6],
+      encoding: match[7],
+      releaseGroup: match[8],
     };
   } else {
     match = title.match(movieRegex);
@@ -97,13 +95,10 @@ export function parseTitle(title: string): TitleData | null {
       return {
         name: match[1].replace(/\./g, " "),
         type: Category.MOVIES,
+        year: parseInt(match[2], 10),
+        resolution: match[3],
         season: null,
         episode: null,
-        year: parseInt(match[2], 10),
-        otherSpecs: match[3]
-          .split(".")
-          .concat(match[4].split("."))
-          .filter(Boolean),
       };
     }
   }

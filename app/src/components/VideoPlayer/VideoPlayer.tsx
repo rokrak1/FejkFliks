@@ -14,16 +14,18 @@ import toast from "react-hot-toast";
 import { IUser, useAuth } from "../../store/AuthProvider";
 import { shallow } from "zustand/shallow";
 import { VideoList } from "../../service/types";
+import { fetchSubtitles } from "../../service/video";
+import { getSubtitleForProgress } from "./videoPlayer.utils";
 
 const VideoPlayer = () => {
   const { id } = useParams();
 
-  const idRef = useRef(id);
+  const videoListRef = useRef<VideoList | null>(null);
+  const userRef = useRef<IUser | null>(null);
   const playedSecondsRef = useRef(0);
-  const videoListRef = useRef({} as VideoList);
-  const userRef = useRef({} as IUser);
   const playerRef = useRef<ReactPlayer>({} as ReactPlayer);
   const showOverlayRef = useRef<NodeJS.Timeout | null>(null);
+  const subtitleTextRef = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
   const [showOverlay, setShowOverlay] = useState(false);
@@ -39,7 +41,9 @@ const VideoPlayer = () => {
   );
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [subtitle, setSubtitle] = useState<string | null>(null);
+  const [subtitleText, setSubtitleText] = useState<string | null>(null);
 
   useEffect(() => {
     setShowPlayButton(true);
@@ -58,7 +62,7 @@ const VideoPlayer = () => {
     // Setting timeout because the player triggers onProgress event on load
     if (playerRef.current) {
       setTimeout(() => {
-        const currentVideo = videoListRef.current?.items?.find(
+        const currentVideo = videoList.items?.find(
           (video) => video.guid === id
         );
         playedSecondsRef.current = currentVideo?.playedSeconds || 0;
@@ -68,20 +72,20 @@ const VideoPlayer = () => {
         setPlaying(true);
       }, 1000);
     }
-  }, [playerRef]);
+  }, [playerRef, videoList]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (!userRef.current?.userData?.id) {
+      if (!userRef.current.userData?.id) {
         toast.error("Error saving video progress");
         return;
       }
       const data = JSON.stringify({
         playedSeconds: playedSecondsRef.current,
-        video_id: idRef.current,
-        user_id: userRef.current?.userData?.id,
+        video_id: id,
+        user_id: userRef.current.userData?.id,
       });
-      const currentVideo = videoListRef.current?.items?.find(
+      const currentVideo = videoListRef.current.items?.find(
         (video) => video.guid === id
       );
       const wasPlayed = currentVideo?.playedSeconds;
@@ -94,7 +98,7 @@ const VideoPlayer = () => {
           body: data,
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user.accessToken}`,
+            Authorization: `Bearer ${userRef.current.accessToken}`,
             apikey: `${import.meta.env.VITE_SUPABASE_PUBLIC_ANON_KEY}`,
           },
           keepalive: true, // Ensure the request is sent even if the page unloads
@@ -126,13 +130,7 @@ const VideoPlayer = () => {
       handleBeforeUnload();
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, []);
-
-  // Updating refs for cleanup since variables are sometimes set to undefined before the cleanup function is called
-  useEffect(() => {
-    videoListRef.current = videoList;
-    userRef.current = user;
-  }, [videoList, user]);
+  }, [id]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -145,6 +143,27 @@ const VideoPlayer = () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
+
+  useEffect(() => {
+    videoListRef.current = videoList;
+    userRef.current = user;
+  }, [videoList]);
+
+  useEffect(() => {
+    (async () => {
+      if (id) {
+        const video = videoList.items?.find((video) => video.guid === id);
+
+        if (video?.title) {
+          let subs = await fetchSubtitles(video.title, user.accessToken);
+
+          if (subs) {
+            setSubtitle(subs);
+          }
+        }
+      }
+    })();
+  }, [id]);
 
   const handleOverlay = () => {
     if (showOverlayRef.current) {
@@ -176,12 +195,28 @@ const VideoPlayer = () => {
     setProgress(e.played);
     setLoaded(e.loaded);
     playedSecondsRef.current = e.playedSeconds;
+
+    // Creating own subtitle system since the player doesn't support direct file loading
+    if (subtitle) {
+      const subText = getSubtitleForProgress(e.playedSeconds, subtitle);
+
+      if (subText) {
+        if (subText.text !== subtitleText || !subtitleText) {
+          clearTimeout(subtitleTextRef.current);
+          setSubtitleText(subText.text);
+          subtitleTextRef.current = setTimeout(() => {
+            setSubtitleText(null);
+          }, subText.duration + 500);
+        }
+      }
+    }
   };
 
   if (!id) {
     navigate("/");
     toast.error("Error");
   }
+
   let videoId = `${import.meta.env.VITE_BUNNY_STREAM_URL}/${id}/playlist.m3u8`;
   return (
     <motion.div
@@ -262,6 +297,15 @@ const VideoPlayer = () => {
               )}
             </motion.div>
           </div>
+        )}
+
+        {subtitleText && (
+          <motion.div
+            key="subtitle"
+            className="absolute bottom-[14%] left-0 w-full text-center text-white text-2xl  p-2"
+          >
+            <pre>{subtitleText}</pre>
+          </motion.div>
         )}
       </AnimatePresence>
 

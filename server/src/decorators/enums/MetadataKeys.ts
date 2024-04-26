@@ -3,4 +3,5 @@ export enum MetadataKeys {
   PATH = "path",
   MIDDLEWARE = "middleware",
   HANDLER = "handler",
+  SCHEMA = "schema",
 }

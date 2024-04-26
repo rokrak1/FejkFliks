@@ -16,6 +16,7 @@ const jsonwebtokenAuth = async (
     done();
   } catch (error) {
     reply.code(401).send({ message: `Unauthorized: ${error}` });
+    return;
   }
 };
 

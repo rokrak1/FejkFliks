@@ -1,10 +1,5 @@
 import puppeteer, { Page } from "puppeteer";
-import {
-  saveBase64AsFile,
-  fetchData,
-  parseTitle,
-  Category,
-} from "../utils/puppeteer.utils";
+import { fetchData, parseTitle, Category } from "../utils/puppeteer.utils";
 
 var headers = {};
 
@@ -131,9 +126,8 @@ const twShowHandler = async (
   if (responseData.error) {
     throw new Error(responseData.error.message);
   }
-
-  saveBase64AsFile(responseData.base64, fileName);
-  return responseData;
+  //TODO: Upload file to bunny.net
+  return Buffer.from(responseData.text!, "utf-8");
 };
 
 const movieHandler = (page: Page) => {};
@@ -149,7 +143,7 @@ export const scrapeSubtitle = async (fileName: string) => {
     throw new Error("Error parsing title data");
   }
 
-  const { name, season, episode, otherSpecs, type } = titleData;
+  const { name, season, episode, type } = titleData;
   console.log(titleData);
   const browser = await puppeteer.launch({
     headless: true,
@@ -184,9 +178,9 @@ export const scrapeSubtitle = async (fileName: string) => {
       if (season === null || episode === null) {
         throw new Error("Season or episode not provided");
       }
-      await twShowHandler(page, season, episode, fileName);
+      return await twShowHandler(page, season, episode, fileName);
     } else if (category === Category.MOVIES) {
-      await movieHandler(page);
+      return await movieHandler(page);
     }
   } catch (error) {
     console.error(error);

@@ -82,6 +82,27 @@ export const fetchVideos = async (accessToken: string): Promise<VideoList> => {
   }
 };
 
+export const fetchSubtitles = async (fileName: string, accessToken: string) => {
+  const options = {
+    method: "GET",
+    headers: { accept: "application/json", Authorization: accessToken },
+  };
+
+  try {
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }api/getSubtitles?fileName=${fileName}`,
+      options
+    );
+    const data = await response.text();
+    return data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
 const constructThumbnailsAndPreview = (data: any) => {
   data.forEach((video: any) => {
     video.thumbnail = `${import.meta.env.VITE_BUNNY_STREAM_URL}/${video.guid}/${
