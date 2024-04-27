@@ -13,7 +13,7 @@ function withProtected<T extends object>(
 
     if (loading) {
       return (
-        <div className="w-full h-full flex items-center justify-center absolute top-0 left-0 bg-black bg-opacity-90 backdrop-blur-xl">
+        <div className="w-full h-full flex items-center justify-center absolute top-0 left-0 bg-black bg-opacity-90 backdrop-blur-lg">
           <LoadingIcon size={100} color="white" />
         </div>
       );
