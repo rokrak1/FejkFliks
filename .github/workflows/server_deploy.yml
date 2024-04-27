@@ -35,6 +35,12 @@ jobs:
 
       - name: SSH and Deploy
         run: |
+          ssh -vvv -o StrictHostKeyChecking=no -p ${{ secrets.CPANEL_SSH_PORT }} ${{ secrets.CPANEL_SSH_USERNAME }}@${{ secrets.CPANEL_SSH_HOST }} << 'EOF'
+            echo "Test SSH Connection"
+          EOF
+
+      - name: SSH and Deploy
+        run: |
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.CPANEL_SSH_PORT }} ${{ secrets.CPANEL_SSH_USERNAME }}@${{ secrets.CPANEL_SSH_HOST }} << 'EOF'
             mkdir -p ${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
             rsync -avz -e "ssh -p ${{ secrets.CPANEL_SSH_PORT }} -o StrictHostKeyChecking=no" --exclude node_modules --include .env . ${{ secrets.CPANEL_SSH_USERNAME }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
