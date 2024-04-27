@@ -33,10 +33,6 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
 
-      - name: Remove Assets Folder
-        run: |
-          lftp -u ${{ secrets.FEJKFLIKS_FTP_USERNAME }},${{ secrets.FEJKFLIKS_FTP_PASSWORD }} -e "set ssl:verify-certificate no; glob -a rm -r /assets/*; bye" ${{ secrets.FEJKFLIKS_FTP_SERVER }}
-
       - name: Upload to cPanel 📂
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
