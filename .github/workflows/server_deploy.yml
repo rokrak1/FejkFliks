@@ -1,0 +1,45 @@
+name: Deploy server to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Create .env file
+        run: |
+          echo "SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}" > .env
+          echo "BUNNY_ACCESS_KEY=${{ secrets.BUNNY_ACCESS_KEY }}" >> .env
+          echo "BUNNY_BASE_HOSTNAME=${{ secrets.BUNNY_BASE_HOSTNAME }}" >> .env
+          echo "BUNNY_STORAGE_NAME=${{ secrets.BUNNY_STORAGE_NAME }}" >> .env
+          echo "BUNNY_FTP_USER=${{ secrets.BUNNY_FTP_USER }}" >> .env
+          echo "BUNNY_FTP_PASS=${{ secrets.BUNNY_FTP_PASS }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
+
+      - name: Install SSH Key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
+
+      - name: SSH and Deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.CPANEL_SSH_USERNAME }}@${{ secrets.CPANEL_SSH_HOST }} << 'EOF'
+            mkdir -p ${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
+            rsync -avz --exclude node_modules --include .env . ${{ secrets.CPANEL_SSH_USERNAME }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
+            cd ${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
+            npm install
+            pm2 start app.js --name "my-app"  # Start or restart the application
+            pm2 save  # Save the current process list for startup
+          EOF

@@ -1,4 +1,4 @@
-name: Deploy to cPanel
+name: Deploy app to cPanel
 
 on:
   push:
