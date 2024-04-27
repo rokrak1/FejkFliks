@@ -1,10 +1,23 @@
-import { AppRouter } from "./router";
-import "./controllers/scrape.controller";
+import "dotenv/config";
+import app from "./main";
 
-const app = AppRouter.getInstance();
+// Function to start the server
+const startServer = async () => {
+  try {
+    //@ts-ignore
+    if (typeof PhusionPassenger !== "undefined") {
+      //@ts-ignore
+      PhusionPassenger.configure({ autoInstall: false });
+      await app.listen("passenger");
+    } else {
+      await app.listen(8000);
+    }
+    console.log("Server started on port 8000");
+  } catch (err) {
+    console.error("Error starting server:", err);
+    process.exit(1);
+  }
+};
 
-app.register(require("@fastify/cors"), {
-  origin: process.env.ORIGIN || "",
-});
-
-export default app;
+// Starting the server
+startServer();

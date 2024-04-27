@@ -40,6 +40,6 @@ jobs:
             rsync -avz -e "ssh -p ${{ secrets.CPANEL_SSH_PORT }} -o StrictHostKeyChecking=no" --exclude node_modules --include .env . ${{ secrets.CPANEL_SSH_USERNAME }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
             cd ${{ secrets.CPANEL_DEPLOY_DIRECTORY }}
             npm install
-            pm2 start app.js --name "my-app"  # Start or restart the application
-            pm2 save  # Save the current process list for startup
+            pm2 start app.js --name "my-app"
+            pm2 save
           EOF

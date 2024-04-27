@@ -92,7 +92,7 @@ export const fetchSubtitles = async (fileName: string, accessToken: string) => {
     const response = await fetch(
       `${
         import.meta.env.VITE_BACKEND_URL
-      }api/scrape/getSubtitles?fileName=${fileName}`,
+      }scrape/getSubtitles?fileName=${fileName}`,
       options
     );
     const data = await response.text();
