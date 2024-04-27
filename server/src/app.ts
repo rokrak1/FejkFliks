@@ -4,7 +4,7 @@ import "./controllers/scrape.controller";
 const app = AppRouter.getInstance();
 
 app.register(require("@fastify/cors"), {
-  origin: "http://localhost:5173",
+  origin: process.env.ORIGIN || "",
 });
 
 export default app;

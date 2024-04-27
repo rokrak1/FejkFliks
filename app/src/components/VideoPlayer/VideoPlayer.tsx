@@ -147,7 +147,7 @@ const VideoPlayer = () => {
   useEffect(() => {
     videoListRef.current = videoList;
     userRef.current = user;
-  }, [videoList]);
+  }, [videoList, user]);
 
   useEffect(() => {
     (async () => {

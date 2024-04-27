@@ -42,6 +42,11 @@ const Routes = () => {
           }
         />
         <Route key={"login"} path="/login" Component={Login} />
+        <Route
+          key={"not-found"}
+          path="*"
+          Component={withProtected(Home) as ComponentType<{}>}
+        />
       </Switch>
     </AnimatePresence>
   );
