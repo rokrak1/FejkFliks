@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.FEJKFLIKS_FTP_USERNAME }}
           password: ${{ secrets.FEJKFLIKS_FTP_PASSWORD }}
           server-dir: /
-          local-dir: ./dist/
+          local-dir: ./app/dist/
           exclude: |
             **/.git**
             **/.git*/**
