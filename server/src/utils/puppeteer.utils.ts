@@ -74,13 +74,13 @@ export enum Category {
 
 export function parseTitle(title: string): TitleData | null {
   const seriesRegex =
-    /^(.+?)\s+S(\d+)E(\d+)(?:\s+(.*?))?(?:\s+(\d{3,4}p))?\s*(WEBRip|HDTV|BluRay|BRRip)?\s*(x264|x265)?(?:-(\w+))?/i;
+    /^(.+?)[ .]+S(\d+)E(\d+)(?:[ .]+(.*?))?(?:[ .]+(\d{3,4}p))?\s*(WEBRip|HDTV|BluRay|BRRip)?\s*(x264|x265)?(?:-(\w+))?/i;
   const movieRegex = /^(.*?)\s+(\d{4})\s(.*?)(\d{3,4}p)?$/;
 
   let match = title.match(seriesRegex);
   if (match) {
     return {
-      name: match[1].trim(),
+      name: match[1].trim().replace(/\./g, " "),
       type: Category.TV_SHOW,
       season: parseInt(match[2], 10),
       episode: parseInt(match[3], 10),

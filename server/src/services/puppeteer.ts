@@ -147,7 +147,7 @@ export const scrapeSubtitle = async (fileName: string) => {
   }
 
   const titleData = parseTitle(fileName);
-
+  console.log("Title data", titleData);
   if (!titleData) {
     throw new Error("Error parsing title data");
   }

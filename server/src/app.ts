@@ -1,23 +1,16 @@
 import "dotenv/config";
 import app from "./main";
 
-// Function to start the server
-const startServer = async () => {
+const start = async () => {
   try {
-    //@ts-ignore
-    if (typeof PhusionPassenger !== "undefined") {
-      //@ts-ignore
-      PhusionPassenger.configure({ autoInstall: false });
-      await app.listen("passenger");
-    } else {
-      await app.listen(8000);
-    }
-    console.log("Server started on port 8000");
+    const str = await app.listen({
+      port: parseInt(process.env.PORT || "8000"),
+      host: "0.0.0.0",
+    });
+    console.log(`Server running at ${str}`);
   } catch (err) {
-    console.error("Error starting server:", err);
+    app.log.error(err);
     process.exit(1);
   }
 };
-
-// Starting the server
-startServer();
+start();
