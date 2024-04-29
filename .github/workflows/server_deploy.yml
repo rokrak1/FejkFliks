@@ -50,4 +50,4 @@ jobs:
             docker stop ${{ secrets.CONTAINER_NAME }} || true
             docker rm ${{ secrets.CONTAINER_NAME }} || true
             docker build -t ${{ secrets.CONTAINER_NAME }} .
-            docker run -d --name ${{ secrets.CONTAINER_NAME }} -p ${{ secrets.ORIGIN }}:${{ secrets.ORIGIN }} ${{ secrets.CONTAINER_NAME }}
+            docker run -d --name ${{ secrets.CONTAINER_NAME }} -p ${{ secrets.PORT }}:${{ secrets.PORT }} ${{ secrets.CONTAINER_NAME }}
