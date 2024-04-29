@@ -18,7 +18,6 @@ RUN npm install && npm install -g typescript
 
 # Copy the rest of your application's source code
 COPY . .
-COPY .env ./
 
 # Compile TypeScript to JavaScript
 RUN tsc
