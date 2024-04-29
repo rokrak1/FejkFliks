@@ -31,10 +31,11 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
+          source: "server/"
+          target: "${{ secrets.SERVER_PATH }}"
           script: |
-            cd ${{secrets.SERVER_PATH}}
-            git pull origin main
-            docker stop ${{secrets.CONTAINER_NAME}} || true
-            docker rm ${{secrets.CONTAINER_NAME}} || true
-            docker build -t ${{secrets.CONTAINER_NAME}} .
-            docker run -d --name ${{secrets.CONTAINER_NAME}} -p 8000:8000 ${{secrets.CONTAINER_NAME}}
+            cd ${{ secrets.SERVER_PATH }}
+            docker stop ${{ secrets.CONTAINER_NAME }} || true
+            docker rm ${{ secrets.CONTAINER_NAME }} || true
+            docker build -t ${{ secrets.CONTAINER_NAME }} .
+            docker run -d --name ${{ secrets.CONTAINER_NAME }} -p ${{ secrets.ORIGIN }}:${{ secrets.ORIGIN }} ${{ secrets.CONTAINER_NAME }}
