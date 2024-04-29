@@ -155,6 +155,7 @@ export const scrapeSubtitle = async (fileName: string) => {
   const { name, season, episode, type } = titleData;
   const browser = await puppeteer.launch({
     headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   const page = await browser.newPage();

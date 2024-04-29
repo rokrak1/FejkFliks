@@ -18,6 +18,7 @@ RUN npm install && npm install -g typescript
 
 # Copy the rest of your application's source code
 COPY . .
+COPY .env ./
 
 # Compile TypeScript to JavaScript
 RUN tsc
@@ -25,5 +26,6 @@ RUN tsc
 # Expose port 8000 for your application
 EXPOSE 8000
 
+USER pptruser
 # Define the command to run your app (assuming the output directory is 'dist')
 CMD ["node", "dist/app.js"]
