@@ -25,6 +25,5 @@ RUN tsc
 # Expose port 8000 for your application
 EXPOSE 8000
 
-USER pptruser
 # Define the command to run your app (assuming the output directory is 'dist')
 CMD ["node", "dist/app.js"]
