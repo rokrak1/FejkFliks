@@ -23,8 +23,8 @@ jobs:
           echo "PORT=${{ secrets.PORT }}" >> .env
           echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
 
-      - name: SSH and Redeploy
-        uses: appleboy/ssh-action@master
+      - name: Copy server directory to VPS
+          uses: appleboy/scp-action@master
 
         with:
           host: ${{ secrets.SERVER_IP }}
