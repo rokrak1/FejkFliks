@@ -32,6 +32,8 @@ interface IVideoPlayerControls {
   setOpenSubtitleSettings: React.Dispatch<React.SetStateAction<boolean>>;
   subtitleSeconds: number;
   setSubtitleSeconds: React.Dispatch<React.SetStateAction<number>>;
+  enableSubtitle: boolean;
+  setEnableSubtitle: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
@@ -49,6 +51,8 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
   setOpenSubtitleSettings,
   subtitleSeconds,
   setSubtitleSeconds,
+  enableSubtitle,
+  setEnableSubtitle,
 }) => {
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const videoChangeTimeout = useRef<ReturnType<typeof setTimeout>>(null);
@@ -184,10 +188,11 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
             initial={{ opacity: 0, y: -400 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -400 }}
-            className="absolute top-10 left-[calc(50%-130px)] w-[260px] z-20 bg-gray-900 rounded-lg flex flex-col gap-y-4 items-center rounded-lg"
+            className="absolute top-10 left-[calc(50%-130px)] w-[260px] z-20 bg-gray-900 rounded-lg flex flex-col gap-y-4 items-center rounded-lg glass"
           >
-            <span className="p-3">Subtitle Settings</span>
+            <span className="p-3 text-white">Subtitle Settings</span>
 
+            <span>Adjust time:</span>
             <div className="flex justify-between items-center pb-2 border-white">
               <Control
                 icon={{
@@ -235,7 +240,22 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
             </div>
 
             <div
-              className="w-full py-1 flex justify-center items-center bg-gray-700 rounded-b-lg cursor-pointer"
+              className={`flex cursor-pointer justify-between items-center text-center p-1 px-4 shadow-3xl bg-zinc-700 rounded-lg select-none`}
+              onClick={() => setEnableSubtitle((prevState) => !prevState)}
+            >
+              Click to
+              <span
+                className={`px-1 ${
+                  enableSubtitle ? "text-gray-500" : "text-lime-500"
+                }`}
+              >
+                {enableSubtitle ? "disable" : "enable"}
+              </span>
+              subtitles
+            </div>
+
+            <div
+              className="w-full py-1 flex justify-center items-center bg-zinc-700 rounded-b-lg cursor-pointer"
               onClick={() => setOpenSubtitleSettings(false)}
             >
               <Control

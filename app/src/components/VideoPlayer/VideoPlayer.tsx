@@ -47,6 +47,7 @@ const VideoPlayer = () => {
   const [subtitleText, setSubtitleText] = useState<string | null>(null);
   const [subtitleSeconds, setSubtitleSeconds] = useState<number>(0.5);
   const [openSubtitleSettings, setOpenSubtitleSettings] = useState(false);
+  const [enableSubtitle, setEnableSubtitle] = useState(true);
 
   useEffect(() => {
     setShowPlayButton(true);
@@ -207,13 +208,6 @@ const VideoPlayer = () => {
     changeSubtitle();
   };
 
-  const moveSubtitle = (time: number) => {
-    if (subtitleSeconds + time >= 0) setSubtitleSeconds(0);
-    else setSubtitleSeconds(subtitleSeconds + time);
-
-    changeSubtitle();
-  };
-
   const changeSubtitle = () => {
     if (subtitle) {
       const subText = getSubtitleForProgress(
@@ -273,6 +267,8 @@ const VideoPlayer = () => {
               subtitleSeconds={subtitleSeconds}
               openSubtitleSettings={openSubtitleSettings}
               setOpenSubtitleSettings={setOpenSubtitleSettings}
+              enableSubtitle={enableSubtitle}
+              setEnableSubtitle={setEnableSubtitle}
             />
             <motion.div
               className="absolute top-[40px] left-[40px] cursor-pointer flex justify-between flex-wrap w-[calc(100%-80px)] gap-y-4"
@@ -318,7 +314,7 @@ const VideoPlayer = () => {
           </div>
         )}
 
-        {subtitleText && (
+        {subtitleText && enableSubtitle && (
           <motion.div
             key="subtitle"
             className="absolute bottom-[14%] left-0 w-full text-center text-white text-2xl  p-2"
