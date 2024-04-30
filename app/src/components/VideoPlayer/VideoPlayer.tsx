@@ -21,6 +21,7 @@ const VideoPlayer = () => {
   const { id } = useParams();
 
   const videoListRef = useRef<VideoList | null>(null);
+  const idRef = useRef<string | null>(null);
   const userRef = useRef<IUser | null>(null);
   const playedSecondsRef = useRef(0);
   const playerRef = useRef<ReactPlayer>({} as ReactPlayer);
@@ -35,6 +36,7 @@ const VideoPlayer = () => {
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
   const [loaded, setLoaded] = useState(0);
+  const [subtitle, setSubtitle] = useState<string | null>(null);
   const [videoList, setVideoList, fetchVideoInfo] = useDataStore(
     (s) => [s.videoList, s.setVideoList, s.fetchVideoInfo],
     shallow
@@ -42,8 +44,9 @@ const VideoPlayer = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [subtitle, setSubtitle] = useState<string | null>(null);
   const [subtitleText, setSubtitleText] = useState<string | null>(null);
+  const [subtitleSeconds, setSubtitleSeconds] = useState<number>(0.5);
+  const [openSubtitleSettings, setOpenSubtitleSettings] = useState(false);
 
   useEffect(() => {
     setShowPlayButton(true);
@@ -82,11 +85,11 @@ const VideoPlayer = () => {
       }
       const data = JSON.stringify({
         playedSeconds: playedSecondsRef.current,
-        video_id: id,
+        video_id: idRef.current,
         user_id: userRef.current.userData?.id,
       });
       const currentVideo = videoListRef.current.items?.find(
-        (video) => video.guid === id
+        (video) => video.guid === idRef.current
       );
       const wasPlayed = currentVideo?.playedSeconds;
 
@@ -107,7 +110,7 @@ const VideoPlayer = () => {
 
       // Update local state
       const updatedVideos = videoListRef.current.items?.map((video) => {
-        if (video.guid === id) {
+        if (video.guid === idRef.current) {
           return {
             ...video,
             playedSeconds: playedSecondsRef.current,
@@ -147,7 +150,8 @@ const VideoPlayer = () => {
   useEffect(() => {
     videoListRef.current = videoList;
     userRef.current = user;
-  }, [videoList, user]);
+    idRef.current = id;
+  }, [videoList, user, id]);
 
   useEffect(() => {
     (async () => {
@@ -170,9 +174,12 @@ const VideoPlayer = () => {
       clearTimeout(showOverlayRef.current);
     }
     setShowOverlay(true);
-    showOverlayRef.current = setTimeout(() => {
-      setShowOverlay(false);
-    }, 4000);
+
+    if (!openSubtitleSettings) {
+      showOverlayRef.current = setTimeout(() => {
+        setShowOverlay(false);
+      }, 4000);
+    }
   };
 
   const handleFullScreen = (close?: boolean) => {
@@ -197,9 +204,22 @@ const VideoPlayer = () => {
     playedSecondsRef.current = e.playedSeconds;
 
     // Creating own subtitle system since the player doesn't support direct file loading
-    if (subtitle) {
-      const subText = getSubtitleForProgress(e.playedSeconds, subtitle);
+    changeSubtitle();
+  };
 
+  const moveSubtitle = (time: number) => {
+    if (subtitleSeconds + time >= 0) setSubtitleSeconds(0);
+    else setSubtitleSeconds(subtitleSeconds + time);
+
+    changeSubtitle();
+  };
+
+  const changeSubtitle = () => {
+    if (subtitle) {
+      const subText = getSubtitleForProgress(
+        playedSecondsRef.current + subtitleSeconds,
+        subtitle
+      );
       if (subText) {
         if (subText.text !== subtitleText || !subtitleText) {
           clearTimeout(subtitleTextRef.current);
@@ -211,11 +231,6 @@ const VideoPlayer = () => {
       }
     }
   };
-
-  if (!id) {
-    navigate("/");
-    toast.error("Error");
-  }
 
   let videoId = `${import.meta.env.VITE_BUNNY_STREAM_URL}/${id}/playlist.m3u8`;
   return (
@@ -254,6 +269,10 @@ const VideoPlayer = () => {
               loaded={loaded}
               handleFullScreen={handleFullScreen}
               isFullscreen={isFullscreen}
+              setSubtitleSeconds={setSubtitleSeconds}
+              subtitleSeconds={subtitleSeconds}
+              openSubtitleSettings={openSubtitleSettings}
+              setOpenSubtitleSettings={setOpenSubtitleSettings}
             />
             <motion.div
               className="absolute top-[40px] left-[40px] cursor-pointer flex justify-between flex-wrap w-[calc(100%-80px)] gap-y-4"

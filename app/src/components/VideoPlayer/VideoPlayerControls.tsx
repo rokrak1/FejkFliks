@@ -8,6 +8,9 @@ import {
   VolumeOffIcon,
   FullscreenIcon,
   FullscreenOff,
+  SubtitleIcon,
+  ArrowIcon,
+  DoubleArrowIcon,
 } from "../../assets/icons/icons";
 import { Icon } from "../../assets/icons/types";
 import ReactPlayer from "react-player";
@@ -25,6 +28,10 @@ interface IVideoPlayerControls {
   loaded: number;
   handleFullScreen: (close?: boolean) => void;
   isFullscreen: boolean;
+  openSubtitleSettings: boolean;
+  setOpenSubtitleSettings: React.Dispatch<React.SetStateAction<boolean>>;
+  subtitleSeconds: number;
+  setSubtitleSeconds: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
@@ -38,6 +45,10 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
   setVolume,
   handleFullScreen,
   isFullscreen,
+  openSubtitleSettings,
+  setOpenSubtitleSettings,
+  subtitleSeconds,
+  setSubtitleSeconds,
 }) => {
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const videoChangeTimeout = useRef<ReturnType<typeof setTimeout>>(null);
@@ -142,20 +153,104 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
             </div>
           </div>
 
-          <motion.span
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleFullScreen(false)}
-            className="p-3 cursor-pointer"
-          >
-            {isFullscreen ? (
-              <FullscreenOff size={40} color="white" />
-            ) : (
-              <FullscreenIcon size={40} color="white" />
-            )}
-          </motion.span>
+          <motion.div className=" flex justify-between items-center self-end h-24">
+            <div className="flex items-center p-3 gap-x-6">
+              <Control
+                icon={{
+                  Icon: SubtitleIcon,
+                  size: 40,
+                  color: "white",
+                }}
+                onClick={() =>
+                  setOpenSubtitleSettings((prevState) => !prevState)
+                }
+              />
+              <Control
+                icon={{
+                  Icon: isFullscreen ? FullscreenOff : FullscreenIcon,
+                  size: 40,
+                  color: "white",
+                }}
+                onClick={() => handleFullScreen()}
+              />
+            </div>
+          </motion.div>
         </motion.div>
       </motion.div>
+
+      <AnimatePresence>
+        {openSubtitleSettings && (
+          <motion.div
+            initial={{ opacity: 0, y: -400 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -400 }}
+            className="absolute top-10 left-[calc(50%-130px)] w-[260px] z-20 bg-gray-900 rounded-lg flex flex-col gap-y-4 items-center rounded-lg"
+          >
+            <span className="p-3">Subtitle Settings</span>
+
+            <div className="flex justify-between items-center pb-2 border-white">
+              <Control
+                icon={{
+                  Icon: DoubleArrowIcon,
+                  direction: "left",
+                  size: 30,
+                  color: "white",
+                }}
+                onClick={() => setSubtitleSeconds(subtitleSeconds - 1)}
+              />
+              <span className="flex px-4 items-center">
+                <Control
+                  icon={{
+                    Icon: ArrowIcon,
+                    direction: "left",
+                    size: 30,
+                    color: "white",
+                  }}
+                  onClick={() => setSubtitleSeconds(subtitleSeconds - 0.1)}
+                />
+
+                <div className="w-12 text-center select-none">
+                  {subtitleSeconds.toFixed(1)} s
+                </div>
+                <Control
+                  icon={{
+                    Icon: ArrowIcon,
+                    direction: "right",
+                    size: 30,
+                    color: "white",
+                  }}
+                  onClick={() => setSubtitleSeconds(subtitleSeconds + 0.1)}
+                />
+              </span>
+
+              <Control
+                icon={{
+                  Icon: DoubleArrowIcon,
+                  direction: "right",
+                  size: 30,
+                  color: "white",
+                }}
+                onClick={() => setSubtitleSeconds(subtitleSeconds + 1)}
+              />
+            </div>
+
+            <div
+              className="w-full py-1 flex justify-center items-center bg-gray-700 rounded-b-lg cursor-pointer"
+              onClick={() => setOpenSubtitleSettings(false)}
+            >
+              <Control
+                icon={{
+                  Icon: ArrowIcon,
+                  direction: "up",
+                  size: 30,
+                  color: "white",
+                }}
+                onClick={() => null}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -165,12 +260,13 @@ interface Control {
     Icon: React.FC<Icon>;
     size: number;
     color: string;
+    direction?: "left" | "right" | "up" | "down";
   };
   onClick: () => void;
 }
 
 const Control: React.FC<Control> = ({
-  icon: { Icon, size, color },
+  icon: { Icon, size, color, direction },
   onClick,
 }) => {
   return (
@@ -180,7 +276,7 @@ const Control: React.FC<Control> = ({
       whileTap={{ scale: 0.9 }}
       onClick={onClick}
     >
-      <Icon size={size} color={color} />
+      <Icon size={size} color={color} direction={direction} />
     </motion.span>
   );
 };

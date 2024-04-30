@@ -27,6 +27,19 @@ export const SearchIcon: React.FC<Icon> = ({ size, color }) => (
     />
   </svg>
 );
+export const SubtitleIcon: React.FC<Icon> = ({ size, color }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size || 24}
+    height={size || 24}
+    viewBox="0 0 24 24"
+  >
+    <path
+      fill={color || "currentColor"}
+      d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2M5 12h2c.55 0 1 .45 1 1s-.45 1-1 1H5c-.55 0-1-.45-1-1s.45-1 1-1m8 6H5c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1m6 0h-2c-.55 0-1-.45-1-1s.45-1 1-1h2c.55 0 1 .45 1 1s-.45 1-1 1m0-4h-8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1"
+    />
+  </svg>
+);
 export const LoadingIcon: React.FC<Icon> = ({ size, color }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -247,6 +260,43 @@ export const ArrowIcon: React.FC<ArrowIcon> = ({ size, color, direction }) => {
       <path
         fill={color || "currentColor"}
         d="M104.704 685.248a64 64 0 0 0 90.496 0l316.8-316.8 316.8 316.8a64 64 0 0 0 90.496-90.496L557.248 232.704a64 64 0 0 0-90.496 0L104.704 594.752a64 64 0 0 0 0 90.496"
+      />
+    </svg>
+  );
+};
+export const DoubleArrowIcon: React.FC<ArrowIcon> = ({
+  size,
+  color,
+  direction,
+}) => {
+  let rotate = 0;
+
+  switch (direction) {
+    case "up":
+      rotate = 270;
+      break;
+    case "down":
+      rotate = 90;
+      break;
+    case "left":
+      rotate = 180;
+      break;
+    case "right":
+      rotate = 0;
+      break;
+  }
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size || 24}
+      height={size || 24}
+      viewBox="0 0 56 56"
+      style={{ transform: `rotate(${rotate}deg)` }}
+    >
+      <path
+        fill={color || "currentColor"}
+        d="M2.928 44.495c.834 0 1.525-.265 2.339-.753l20.72-12.2c1.118-.65 1.728-1.383 1.952-2.237v11.713c0 2.257 1.342 3.477 2.928 3.477.834 0 1.525-.265 2.339-.753l20.74-12.2c1.424-.854 2.054-1.85 2.054-3.03 0-1.159-.63-2.155-2.054-3.01l-20.74-12.2c-.814-.488-1.505-.752-2.339-.752-1.586 0-2.928 1.22-2.928 3.477V27.74c-.224-.854-.834-1.585-1.952-2.236l-20.72-12.2c-.834-.489-1.505-.753-2.339-.753C1.342 12.55 0 13.77 0 16.027v24.99c0 2.258 1.342 3.478 2.928 3.478"
       />
     </svg>
   );

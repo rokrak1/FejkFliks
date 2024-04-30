@@ -4,7 +4,7 @@ import "./controllers/scrape.controller";
 const app = AppRouter.getInstance();
 
 app.register(require("@fastify/cors"), {
-  origin: process.env.ORIGIN || "",
+  origin: process.env.ORIGIN || "*",
 });
 
 app.get("/", async (req, res) => {
