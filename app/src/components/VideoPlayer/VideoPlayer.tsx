@@ -90,16 +90,18 @@ const VideoPlayer = () => {
         user_id: userRef.current.userData?.id,
         done_watching: false,
       });
+      console.log("VideoListRef:", idRef.current, videoListRef.current.items);
       const currentVideo = videoListRef.current.items?.find(
         (video) => video.guid === idRef.current
       );
-      const wasPlayed = currentVideo?.playedSeconds;
+      console.log("Current Video:", currentVideo);
+      const wasNeverPlayed = currentVideo?.playedSeconds === undefined;
 
-      const wasPlayedId = wasPlayed ? `?id=eq.${currentVideo.infoId}` : "";
+      const wasPlayedId = wasNeverPlayed ? "" : `?id=eq.${currentVideo.infoId}`;
       fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/video_info${wasPlayedId}`,
         {
-          method: wasPlayed ? "PATCH" : "POST",
+          method: wasNeverPlayed ? "POST" : "PATCH",
           body: data,
           headers: {
             "Content-Type": "application/json",
