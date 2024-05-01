@@ -11,11 +11,13 @@ import {
   SubtitleIcon,
   ArrowIcon,
   DoubleArrowIcon,
+  FinishIcon,
 } from "../../assets/icons/icons";
 import { Icon } from "../../assets/icons/types";
 import ReactPlayer from "react-player";
 import { useRef, useState } from "react";
 import { GradientHorizontalSlider } from "./slider";
+import { useWindowSize } from "../../hooks/useWindowSize";
 
 interface IVideoPlayerControls {
   playing: boolean;
@@ -34,6 +36,7 @@ interface IVideoPlayerControls {
   setSubtitleSeconds: React.Dispatch<React.SetStateAction<number>>;
   enableSubtitle: boolean;
   setEnableSubtitle: React.Dispatch<React.SetStateAction<boolean>>;
+  onVideoFinishWatching: () => void;
 }
 
 const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
@@ -53,9 +56,11 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
   setSubtitleSeconds,
   enableSubtitle,
   setEnableSubtitle,
+  onVideoFinishWatching,
 }) => {
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const videoChangeTimeout = useRef<ReturnType<typeof setTimeout>>(null);
+  const { width } = useWindowSize();
 
   const seekTo = (time: number) => {
     const player = playerRef?.current;
@@ -76,6 +81,7 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
     }
   };
 
+  const iconSize = width < 1100 ? 30 : 40;
   return (
     <div className="justify-between absolute bottom-0 left-0 w-full h-full flex flex-col items-center">
       <div
@@ -95,12 +101,12 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
           loaded={loaded}
           setOnMouseUpValue={setVideoTime}
         />
-        <motion.div className="bg-gray-900/25 flex justify-between items-center w-full h-24">
-          <div className="flex items-center p-3 gap-x-6">
+        <motion.div className="bg-gray-900/25 flex justify-between items-center w-full">
+          <div className="flex items-center p-2 gap-x-6">
             <Control
               icon={{
                 Icon: playing ? PauseIcon : PlayIcon,
-                size: 40,
+                size: iconSize,
                 color: "white",
               }}
               onClick={() => {
@@ -111,7 +117,7 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
             <Control
               icon={{
                 Icon: RewindIcon,
-                size: 40,
+                size: iconSize,
                 color: "white",
               }}
               onClick={() => seekTo(-15)}
@@ -120,7 +126,7 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
             <Control
               icon={{
                 Icon: ForwardICon,
-                size: 40,
+                size: iconSize,
                 color: "white",
               }}
               onClick={() => seekTo(15)}
@@ -133,7 +139,7 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
               <Control
                 icon={{
                   Icon: volume === 0 ? VolumeOffIcon : VolumeIcon,
-                  size: 40,
+                  size: iconSize,
                   color: "white",
                 }}
                 onClick={() => setVolume(volume === 0 ? lastVolume : 0)}
@@ -157,12 +163,20 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
             </div>
           </div>
 
-          <motion.div className=" flex justify-between items-center self-end h-24">
+          <motion.div className=" flex justify-between items-center self-end">
             <div className="flex items-center p-3 gap-x-6">
               <Control
                 icon={{
+                  Icon: FinishIcon,
+                  size: iconSize,
+                  color: "white",
+                }}
+                onClick={onVideoFinishWatching}
+              />
+              <Control
+                icon={{
                   Icon: SubtitleIcon,
-                  size: 40,
+                  size: iconSize,
                   color: "white",
                 }}
                 onClick={() =>
@@ -172,7 +186,7 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
               <Control
                 icon={{
                   Icon: isFullscreen ? FullscreenOff : FullscreenIcon,
-                  size: 40,
+                  size: iconSize,
                   color: "white",
                 }}
                 onClick={() => handleFullScreen()}

@@ -8,8 +8,8 @@ import { shallow } from "zustand/shallow";
 import VideoWidget from "./VideoWidget";
 
 const VideoList = () => {
-  const [videoList, collections] = useDataStore(
-    (s) => [s.videoList, s.collections],
+  const [videoList, collections, fetchVideoInfo] = useDataStore(
+    (s) => [s.videoList, s.collections, s.fetchVideoInfo],
     shallow
   );
   const navigate = useNavigate();
@@ -22,16 +22,22 @@ const VideoList = () => {
 
   return (
     <motion.div className="w-full">
-      {videoList?.items?.filter((v) => v.hasFinished === false).length > 0 && (
+      {videoList?.items?.filter((v) => v.continueWatching).length > 0 && (
         <>
           <div className="flex px-5 pt-5 items-center gap-x-3">
             <div className="text-3xl font-medium ">Continue watching</div>
           </div>
           <DraggableScrollContainer enableControls>
             {videoList?.items
-              ?.filter((v) => v.hasFinished === false)
+              ?.filter((v) => v.continueWatching)
+              .sort((a, b) => b.updatedAt - a.updatedAt)
               .map((video, index) => (
-                <VideoWidget key={index} video={video} index={index} />
+                <VideoWidget
+                  key={index}
+                  video={video}
+                  index={index}
+                  fetchVideoInfo={fetchVideoInfo}
+                />
               ))}
           </DraggableScrollContainer>
         </>

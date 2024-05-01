@@ -1,3 +1,4 @@
+import { supabase } from "../config/supabase";
 import { VideoLibrary, VideoList } from "./types";
 
 export const fetchVideoLibrary = async (
@@ -132,5 +133,29 @@ export const getVideo = async (accessToken: string) => {
   } catch (err) {
     console.error(err);
     return [];
+  }
+};
+
+export const finishWatchingVideo = async (
+  videoId: string
+): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      throw error;
+    }
+
+    const user_id = data.user.app_metadata.user_id;
+
+    await supabase
+      .from("video_info")
+      .update({ done_watching: true, playedSeconds: 0 })
+      .eq("video_id", videoId)
+      .eq("user_id", user_id);
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
   }
 };

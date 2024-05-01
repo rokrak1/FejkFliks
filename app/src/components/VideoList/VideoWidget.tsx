@@ -1,16 +1,23 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Video } from "../../service/types";
+import { Video, VideoList } from "../../service/types";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
+import { FinishIcon } from "../../assets/icons/icons";
+import { finishWatchingVideo } from "../../service/video";
 
 const VideoWidget = ({
   video,
   index,
   usingGrid,
+  fetchVideoInfo,
 }: {
   video: Video;
   index?: number;
   usingGrid?: boolean;
+  fetchVideoInfo?: (
+    updateState: boolean,
+    videoList?: VideoList
+  ) => Promise<VideoList>;
 }) => {
   const [hoveredVideo, setHoveredVideo] = useState("");
   const hoverRef = useRef<NodeJS.Timeout>(null);
@@ -18,6 +25,17 @@ const VideoWidget = ({
 
   const onVideoSelect = (id: string) => {
     navigate(`/video/${id}`);
+  };
+
+  const onVideoFinish = async (e) => {
+    e.stopPropagation();
+
+    const updated = await finishWatchingVideo(video.guid);
+    if (!updated) {
+      return;
+    }
+
+    await fetchVideoInfo(true);
   };
 
   const calculatePlayedPercentage = () => {
@@ -33,8 +51,8 @@ const VideoWidget = ({
         opacity: 1,
         transition: { duration: 0.5, delay: (index || 0) * 0.1 },
       }}
-      className={`relative glass rounded-xl my-1 h-48 flex-shrink-0 cursor-pointer overflow-hidden 
-      ${usingGrid ? "w-full" : "w-[300px]"}
+      className={`relative glass rounded-xl my-1 h-40 flex-shrink-0 cursor-pointer overflow-hidden 
+      ${usingGrid ? "w-full" : "w-[280px]"}
       `}
       onClick={() => onVideoSelect(video.guid)}
       onMouseEnter={() => {
@@ -86,6 +104,15 @@ const VideoWidget = ({
           />
         )}
       </AnimatePresence>
+
+      {fetchVideoInfo && (
+        <motion.div
+          className="absolute top-2 right-2 z-50"
+          onClick={onVideoFinish}
+        >
+          <FinishIcon size={30} color="white" />
+        </motion.div>
+      )}
     </motion.div>
   );
 };

@@ -18,8 +18,8 @@ interface DataStore {
   setCollections: (collections: Collection[]) => void;
   initializeData: (user: IUser) => Promise<void>;
   fetchVideoInfo: (
-    videoList: VideoList,
-    updateState?: boolean
+    updateState: boolean,
+    videoList?: VideoList
   ) => Promise<VideoList>;
 }
 
@@ -29,6 +29,8 @@ interface IVideoInfo {
   playedSeconds: number;
   video_id: string;
   user_id: string;
+  updated_at: string;
+  done_watching: boolean;
 }
 
 export const useDataStore = create<DataStore>((set, get) => ({
@@ -69,7 +71,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         video.title = video.title.split(".").join(" ");
       });
       try {
-        videos = await get().fetchVideoInfo(videos);
+        videos = await get().fetchVideoInfo(false, videos);
       } catch (error) {
         console.log(error);
       }
@@ -79,9 +81,10 @@ export const useDataStore = create<DataStore>((set, get) => ({
       set({ videoList: videos });
     }
   },
-  fetchVideoInfo: async (videoList: VideoList, updateState: boolean) => {
-    let response = await supabase.from("video_info").select("*");
-    let watchedVideos: IVideoInfo[] = response.data;
+  fetchVideoInfo: async (updateState: boolean, newVideoList?: VideoList) => {
+    const videoList = newVideoList || get().videoList;
+    const response = await supabase.from("video_info").select("*");
+    const watchedVideos: IVideoInfo[] = response.data;
 
     watchedVideos.forEach((videoInfo) => {
       const watchedVideoId = videoInfo.video_id;
@@ -90,10 +93,10 @@ export const useDataStore = create<DataStore>((set, get) => ({
       );
       if (video) {
         video.playedSeconds = videoInfo.playedSeconds;
-        video.hasFinished =
-          video.length - videoInfo.playedSeconds < 5 ? true : false;
-        video.continueWatching = video.hasFinished ? false : true;
+        video.doneWatching = videoInfo.done_watching;
+        video.continueWatching = !video.doneWatching && video.playedSeconds > 0;
         video.infoId = videoInfo.id;
+        video.updatedAt = new Date(videoInfo.updated_at).getTime();
       }
     });
     if (updateState) set({ videoList });

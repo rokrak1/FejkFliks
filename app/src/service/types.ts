@@ -36,9 +36,10 @@ export interface Video {
   thumbnail: string;
   preview: string;
   playedSeconds?: number;
-  hasFinished?: boolean;
+  doneWatching?: boolean;
   continueWatching?: boolean;
   infoId?: string;
+  updatedAt?: number;
 }
 
 export interface VideoLibrary {

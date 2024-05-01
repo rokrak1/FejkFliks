@@ -55,7 +55,7 @@ export async function fetchData(
   )) as ResponseData;
 }
 
-interface TitleData {
+export interface TitleData {
   name: string;
   type: Category;
   season: number | null;
@@ -65,6 +65,7 @@ interface TitleData {
   encoding?: string;
   year?: number;
   releaseGroup?: string;
+  fileName: string;
 }
 
 export enum Category {
@@ -88,6 +89,7 @@ export function parseTitle(title: string): TitleData | null {
       source: match[6],
       encoding: match[7],
       releaseGroup: match[8],
+      fileName: title,
     };
   } else {
     match = title.match(movieRegex);
@@ -99,6 +101,7 @@ export function parseTitle(title: string): TitleData | null {
         resolution: match[3],
         season: null,
         episode: null,
+        fileName: title,
       };
     }
   }

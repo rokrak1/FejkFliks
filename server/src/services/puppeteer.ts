@@ -1,5 +1,10 @@
 import puppeteer, { Page } from "puppeteer";
-import { fetchData, parseTitle, Category } from "../utils/puppeteer.utils";
+import {
+  fetchData,
+  parseTitle,
+  Category,
+  TitleData,
+} from "../utils/puppeteer.utils";
 import { uploadSubtitleToBunnyNet } from "./bunny";
 
 var headers = {};
@@ -141,42 +146,8 @@ const twShowHandler = async (
 
 const movieHandler = (page: Page) => {};
 
-export const scrapeSubtitle = async (fileName: string) => {
-  if (!fileName) {
-    throw new Error("No file name provided");
-  }
-
-  const titleData = parseTitle(fileName);
-  console.log("Title data", titleData);
-  if (!titleData) {
-    throw new Error("Error parsing title data");
-  }
-
-  const { name, season, episode, type } = titleData;
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  const page = await browser.newPage();
-
-  // Navigate to the target page
-  await page.goto(mySubsUrl, { waitUntil: "domcontentloaded" });
-
-  await page.setRequestInterception(true);
-
-  // Add event listener to intercept requests
-  page.on("request", (interceptedRequest) => {
-    interceptedRequest.continue();
-  });
-
-  // Listen to response
-  page.on("response", async (response) => {
-    const request = response.request();
-    if (request.url().includes("/downloads")) {
-      headers = request.headers();
-    }
-  });
+const scrapeMain = async (page: Page, titleData: TitleData) => {
+  const { name, season, episode, type, fileName } = titleData;
 
   try {
     const query = name;
@@ -193,7 +164,57 @@ export const scrapeSubtitle = async (fileName: string) => {
     }
   } catch (error) {
     console.error(error);
+    return null;
+  }
+};
+
+export const scrapeSubtitle = async (fileName: string) => {
+  if (!fileName) {
+    throw new Error("No file name provided");
+  }
+
+  const titleData = parseTitle(fileName);
+  if (!titleData) {
+    throw new Error("Error parsing title data");
+  }
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  const page = await browser.newPage();
+
+  try {
+    // Navigate to the target page
+    await page.goto(mySubsUrl, { waitUntil: "domcontentloaded" });
+
+    await page.setRequestInterception(true);
+
+    // Add event listener to intercept requests
+    page.on("request", (interceptedRequest) => {
+      interceptedRequest.continue();
+    });
+
+    // Listen to response
+    page.on("response", async (response) => {
+      const request = response.request();
+      if (request.url().includes("/downloads")) {
+        headers = request.headers();
+      }
+    });
+
+    const buffer = await scrapeMain(page, titleData);
+
+    if (!buffer) {
+      throw new Error("Error scraping subtitle");
+    }
+
     await browser.close();
-    throw error;
+
+    return buffer;
+  } catch (error) {
+    await browser.close();
+    throw new Error("Unknown error occurred" + error);
   }
 };

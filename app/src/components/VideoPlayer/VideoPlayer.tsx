@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import { IUser, useAuth } from "../../store/AuthProvider";
 import { shallow } from "zustand/shallow";
 import { VideoList } from "../../service/types";
-import { fetchSubtitles } from "../../service/video";
+import { fetchSubtitles, finishWatchingVideo } from "../../service/video";
 import { getSubtitleForProgress } from "./videoPlayer.utils";
 
 const VideoPlayer = () => {
@@ -88,6 +88,7 @@ const VideoPlayer = () => {
         playedSeconds: playedSecondsRef.current,
         video_id: idRef.current,
         user_id: userRef.current.userData?.id,
+        done_watching: false,
       });
       const currentVideo = videoListRef.current.items?.find(
         (video) => video.guid === idRef.current
@@ -125,7 +126,7 @@ const VideoPlayer = () => {
       });
 
       // Refetch video list info
-      fetchVideoInfo(videoListRef.current, true);
+      fetchVideoInfo(true, videoListRef.current);
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -168,7 +169,7 @@ const VideoPlayer = () => {
         }
       }
     })();
-  }, [id]);
+  }, [id, videoList]);
 
   const handleOverlay = () => {
     if (showOverlayRef.current) {
@@ -226,6 +227,16 @@ const VideoPlayer = () => {
     }
   };
 
+  const onVideoFinishWatching = async () => {
+    const updated = await finishWatchingVideo(id);
+    if (!updated) {
+      return;
+    }
+
+    await fetchVideoInfo(true);
+    navigate("/");
+  };
+
   let videoId = `${import.meta.env.VITE_BUNNY_STREAM_URL}/${id}/playlist.m3u8`;
   return (
     <motion.div
@@ -269,6 +280,7 @@ const VideoPlayer = () => {
               setOpenSubtitleSettings={setOpenSubtitleSettings}
               enableSubtitle={enableSubtitle}
               setEnableSubtitle={setEnableSubtitle}
+              onVideoFinishWatching={onVideoFinishWatching}
             />
             <motion.div
               className="absolute top-[40px] left-[40px] cursor-pointer flex justify-between flex-wrap w-[calc(100%-80px)] gap-y-4"
