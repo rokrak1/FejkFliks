@@ -256,9 +256,8 @@ const VideoPlayer = () => {
         playing={playing}
         volume={volume}
         onProgress={onProgressChange}
-        onError={() => {
-          toast.error("Error loading video.");
-          navigate("/");
+        onError={(e) => {
+          console.error(e);
         }}
       />
 

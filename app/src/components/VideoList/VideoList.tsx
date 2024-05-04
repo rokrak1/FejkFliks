@@ -20,6 +20,12 @@ const VideoList = () => {
 
   console.log("videoList", videoList);
 
+  const continueWatchingVideos = videoList?.items?.filter(
+    (v) => v.continueWatching
+  );
+  console.log("continueWatchingVideos", continueWatchingVideos);
+  const latestVideos = videoList?.items?.slice(0, 9);
+
   return (
     <motion.div className="w-full">
       {videoList?.items?.filter((v) => v.continueWatching).length > 0 && (
@@ -28,17 +34,9 @@ const VideoList = () => {
             <div className="text-3xl font-medium ">Continue watching</div>
           </div>
           <DraggableScrollContainer enableControls>
-            {videoList?.items
-              ?.filter((v) => v.continueWatching)
-              .sort((a, b) => b.updatedAt - a.updatedAt)
-              .map((video, index) => (
-                <VideoWidget
-                  key={index}
-                  video={video}
-                  index={index}
-                  fetchVideoInfo={fetchVideoInfo}
-                />
-              ))}
+            {continueWatchingVideos?.map((video, index) => (
+              <VideoWidget key={index} video={video} index={index} />
+            ))}
           </DraggableScrollContainer>
         </>
       )}
@@ -46,7 +44,7 @@ const VideoList = () => {
         <div className="text-3xl font-medium ">Lastest Videos</div>
       </div>
       <DraggableScrollContainer enableControls>
-        {videoList?.items?.slice(0, 9).map((video, index) => (
+        {latestVideos?.map((video, index) => (
           <VideoWidget key={index} video={video} index={index} />
         ))}
       </DraggableScrollContainer>

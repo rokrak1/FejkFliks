@@ -99,6 +99,7 @@ export const useDataStore = create<DataStore>((set, get) => ({
         video.updatedAt = new Date(videoInfo.updated_at).getTime();
       }
     });
+    console.log("updagin video list", videoList);
     if (updateState) set({ videoList });
     return videoList;
   },

@@ -1,23 +1,16 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Video, VideoList } from "../../service/types";
+import { Video } from "../../service/types";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
-import { FinishIcon } from "../../assets/icons/icons";
-import { finishWatchingVideo } from "../../service/video";
 
 const VideoWidget = ({
   video,
   index,
   usingGrid,
-  fetchVideoInfo,
 }: {
   video: Video;
   index?: number;
   usingGrid?: boolean;
-  fetchVideoInfo?: (
-    updateState: boolean,
-    videoList?: VideoList
-  ) => Promise<VideoList>;
 }) => {
   const [hoveredVideo, setHoveredVideo] = useState("");
   const hoverRef = useRef<NodeJS.Timeout>(null);
@@ -27,17 +20,6 @@ const VideoWidget = ({
     navigate(`/video/${id}`);
   };
 
-  const onVideoFinish = async (e) => {
-    e.stopPropagation();
-
-    const updated = await finishWatchingVideo(video.guid);
-    if (!updated) {
-      return;
-    }
-
-    await fetchVideoInfo(true);
-  };
-
   const calculatePlayedPercentage = () => {
     return (video.playedSeconds / video.length) * 100;
   };
@@ -45,7 +27,7 @@ const VideoWidget = ({
   return (
     <motion.div
       initial={{ opacity: 0 }}
-      whileHover={{ scale: 1.1 }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       animate={{
         opacity: 1,
@@ -82,12 +64,16 @@ const VideoWidget = ({
             <p className="px-2 bottom-0 py-1 h-14 m-2 rounded-xl max-w-[50ch] text-[17px] overflow-hidden font-medium absolute select-none z-20">
               {video.title}
             </p>
-            <motion.div
-              className="absolute bottom-0 left-0 h-1 z-20 bg-red-500"
-              style={{
-                width: calculatePlayedPercentage() + "%",
-              }}
-            />
+            {(video.doneWatching && (
+              <motion.div className="absolute w-full bottom-0 left-0 h-1 z-20 bg-lime-700" />
+            )) || (
+              <motion.div
+                className="absolute bottom-0 left-0 h-1 z-20 bg-red-500"
+                style={{
+                  width: calculatePlayedPercentage() + "%",
+                }}
+              />
+            )}
           </motion.span>
         )) || (
           <motion.img
@@ -104,15 +90,6 @@ const VideoWidget = ({
           />
         )}
       </AnimatePresence>
-
-      {fetchVideoInfo && (
-        <motion.div
-          className="absolute top-2 right-2 z-50"
-          onClick={onVideoFinish}
-        >
-          <FinishIcon size={30} color="white" />
-        </motion.div>
-      )}
     </motion.div>
   );
 };
