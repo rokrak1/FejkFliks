@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import * as ftp from "basic-ftp";
+import { Readable } from "stream";
 
 export const fetchSubtitleFromBunnyNet = async (fileName: string) => {
   const tmpPath = path.join(process.cwd(), "tmp", `${fileName}.srt`);
@@ -31,10 +32,9 @@ export const uploadSubtitleToBunnyNet = async (
   fileName: string,
   buffer: Buffer
 ) => {
-  const tmpPath = path.join(process.cwd(), "tmp", `${fileName}.srt`);
+  const stream = Readable.from(buffer);
 
   // Create tmp file
-  fs.writeFileSync(tmpPath, buffer);
 
   const client = new ftp.Client();
   try {
@@ -44,12 +44,10 @@ export const uploadSubtitleToBunnyNet = async (
       password: process.env.BUNNY_FTP_PASS,
       port: 21,
     });
-    await client.uploadFrom(tmpPath, `Subtitles/${fileName}.srt`);
-
-    // Remove tmp file
-    fs.unlinkSync(tmpPath);
+    await client.uploadFrom(stream, `Subtitles/${fileName}.srt`);
+    console.log("Uploaded to bunny.net", fileName);
   } catch (err) {
-    console.error(err);
+    console.error("err,", err);
   }
   client.close();
 };
