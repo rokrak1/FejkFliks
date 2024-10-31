@@ -35,7 +35,6 @@ jobs:
           target: "${{ secrets.SERVER_PATH }}/"
           overwrite: true
           debug: true
-          strip_components: 1
 
       - name: Execute deployment script
         uses: appleboy/ssh-action@master

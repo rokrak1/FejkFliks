@@ -259,6 +259,7 @@ const VideoPlayer = () => {
         onError={(e) => {
           console.error(e);
         }}
+        progressInterval={16}
       />
 
       <AnimatePresence>
