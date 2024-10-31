@@ -206,7 +206,7 @@ const VideoPlayer = () => {
     setProgress(e.played);
     setLoaded(e.loaded);
     playedSecondsRef.current = e.playedSeconds;
-
+    console.log("progress chagned:", e.playedSeconds, e.played);
     // Creating own subtitle system since the player doesn't support direct file loading
     changeSubtitle();
   };
@@ -259,7 +259,7 @@ const VideoPlayer = () => {
         onError={(e) => {
           console.error(e);
         }}
-        progressInterval={16}
+        // progressInterval={16}
       />
 
       <AnimatePresence>

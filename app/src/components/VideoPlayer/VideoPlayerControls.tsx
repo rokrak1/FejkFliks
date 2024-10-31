@@ -80,7 +80,7 @@ const VideoPlayerControls: React.FC<IVideoPlayerControls> = ({
       player.seekTo(videoTime);
     }
   };
-
+  console.log("progress", progress);
   const iconSize = width < 1100 ? 30 : 40;
   return (
     <div className="justify-between absolute bottom-0 left-0 w-full h-full flex flex-col items-center">

@@ -29,6 +29,7 @@ export const GradientHorizontalSlider: React.FC<GradientSliderProps> = ({
   useEffect(() => {
     xPos.set(getXFromValue(value));
     xPosTrail.set(getXFromValue(value) + 10);
+    console.log("value:", value, loaded);
   }, [value]);
 
   useEffect(() => {
@@ -36,7 +37,6 @@ export const GradientHorizontalSlider: React.FC<GradientSliderProps> = ({
       xPosLoaded.set(getXFromValue(loaded));
     }
   }, [loaded]);
-
   return (
     <div
       ref={parentRef}
