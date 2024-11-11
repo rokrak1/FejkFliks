@@ -31,7 +31,7 @@ export const GradientHorizontalSlider: React.FC<GradientSliderProps> = ({
     xPosTrail.set(getXFromValue(value) + 10);
     console.log("value:", value, loaded);
   }, [value]);
-
+  console.log("");
   useEffect(() => {
     if (loaded) {
       xPosLoaded.set(getXFromValue(loaded));

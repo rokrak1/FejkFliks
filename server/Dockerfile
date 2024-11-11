@@ -7,6 +7,11 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+RUN mkdir -p /usr/src/app/tmp && chmod 755 /usr/src/app/tmp
+
+# Make sure your app user has proper permissions
+USER node
+
 # Install dependencies
 RUN apt-get update && apt-get install -y wget gnupg ca-certificates \
     fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 \
